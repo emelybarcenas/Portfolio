@@ -1,0 +1,163 @@
+package com.example.gradebookdemo;
+
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.layout.GridPane;
+import javafx.scene.control.Label;
+import javafx.stage.Stage;
+import javafx.geometry.Insets;
+import javafx.scene.control.TextField;
+
+public class GradeBookApplication extends Application {
+
+    @Override
+    public void start(Stage primaryStage) {
+        primaryStage.setTitle("Gradebook Calculator");
+
+        GridPane grid = new GridPane();
+        grid.setPadding(new Insets(10, 10, 10, 10));
+        grid.setVgap(8);
+        grid.setHgap(10);
+
+        // Labels and Inputs
+        Label inClassLabel = new Label("In Class Assignments:");
+        GridPane.setConstraints(inClassLabel, 0, 0);
+        TextField inClassInput = new TextField();
+        inClassInput.setPromptText("Score");
+        GridPane.setConstraints(inClassInput, 1, 0);
+
+        Label progLabel = new Label("Programming Assignments:");
+        GridPane.setConstraints(progLabel, 0, 1);
+        TextField progInput = new TextField();
+        progInput.setPromptText("Score");
+        GridPane.setConstraints(progInput, 1, 1);
+
+        Label exam1Label = new Label("Exam 1:");
+        GridPane.setConstraints(exam1Label, 0, 2);
+        TextField exam1Input = new TextField();
+        exam1Input.setPromptText("Score");
+        GridPane.setConstraints(exam1Input, 1, 2);
+
+        Label exam2Label = new Label("Exam 2:");
+        GridPane.setConstraints(exam2Label, 0, 3);
+        TextField exam2Input = new TextField();
+        exam2Input.setPromptText("Score");
+        GridPane.setConstraints(exam2Input, 1, 3);
+
+        Label finalExamLabel = new Label("Final Exam:");
+        GridPane.setConstraints(finalExamLabel, 0, 4);
+        TextField finalExamInput = new TextField();
+        finalExamInput.setPromptText("Score");
+        GridPane.setConstraints(finalExamInput, 1, 4);
+
+        // Submit Button
+        Button submitButton = new Button("Submit Scores");
+        GridPane.setConstraints(submitButton, 1, 5);
+
+        // Results
+        Label resultLabel = new Label();
+        GridPane.setConstraints(resultLabel, 0, 6, 2, 1);
+
+        grid.getChildren().addAll(inClassLabel, inClassInput,
+                progLabel, progInput,
+                exam1Label, exam1Input,
+                exam2Label, exam2Input,
+                finalExamLabel, finalExamInput,
+                submitButton, resultLabel);
+
+        Scene scene = new Scene(grid, 400, 300);
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+        // Event handler for button
+        submitButton.setOnAction(e -> {
+            try {
+                // Retrieve scores from input fields
+                double inClassScore = Double.parseDouble(inClassInput.getText());
+                double programmingScore = Double.parseDouble(progInput.getText());
+                double exam1Score = Double.parseDouble(exam1Input.getText());
+                double exam2Score = Double.parseDouble(exam2Input.getText());
+                double finalExamScore = Double.parseDouble(finalExamInput.getText());
+
+                // Create GradeBookCategory instances
+                GradeBookCategory inClassAssignments = new GradeBookCategory("In-Class Assignments", 20);
+                GradeBookCategory programmingAssignments = new GradeBookCategory("Programming Assignments", 20);
+                GradeBookCategory midtermExam1 = new GradeBookCategory("Exam 1", 20);
+                GradeBookCategory midtermExam2 = new GradeBookCategory("Exam 2", 20);
+                GradeBookCategory finalExam = new GradeBookCategory("Final Exam", 20);
+
+                // Set max points
+                double maxPoints = 100.00;
+                inClassAssignments.setMaxPoints(maxPoints);
+                programmingAssignments.setMaxPoints(maxPoints);
+                midtermExam1.setMaxPoints(maxPoints);
+                midtermExam2.setMaxPoints(maxPoints);
+                finalExam.setMaxPoints(maxPoints);
+
+                // Set points earned
+                inClassAssignments.setPointsEarned(inClassScore);
+                programmingAssignments.setPointsEarned(programmingScore);
+                midtermExam1.setPointsEarned(exam1Score);
+                midtermExam2.setPointsEarned(exam2Score);
+                finalExam.setPointsEarned(finalExamScore);
+
+                // Calculate total weighted score
+                double totalWeightedScore = inClassAssignments.getWeightedScore() +
+                        programmingAssignments.getWeightedScore() +
+                        midtermExam1.getWeightedScore() +
+                        midtermExam2.getWeightedScore() +
+                        finalExam.getWeightedScore();
+
+                // Calculate numeric and letter grades
+                double numericGrade = totalWeightedScore / 100;
+                String letterGrade = letterGradeEquivalent(numericGrade);
+
+                // Display results
+                resultLabel.setText(String.format("Numeric grade: %.2f\nLetter grade: %s", numericGrade, letterGrade));
+            } catch (NumberFormatException ex) {
+                resultLabel.setText("Please enter valid numeric scores.");
+            }
+        });
+    }
+
+    class GradeBookCategory {
+        private String label;
+        private int weight;
+        private double maxPoints;
+        private double pointsEarned;
+
+        GradeBookCategory(String label, int weight) {
+            this.label = label;
+            this.weight = weight;
+        }
+
+        public void setMaxPoints(double maxPoints) {
+            this.maxPoints = maxPoints;
+        }
+
+        public void setPointsEarned(double pointsEarned) {
+            this.pointsEarned = pointsEarned;
+        }
+
+        public double getWeightedScore() {
+            return (pointsEarned / maxPoints) * weight;
+        }
+    }
+
+    public static String letterGradeEquivalent(double numericScore) {
+        if (numericScore >= 0.95) return "A";
+        else if (numericScore >= 0.90) return "A-";
+        else if (numericScore >= 0.87) return "B+";
+        else if (numericScore >= 0.83) return "B";
+        else if (numericScore >= 0.80) return "B-";
+        else if (numericScore >= 0.77) return "C+";
+        else if (numericScore >= 0.70) return "C";
+        else if (numericScore >= 0.60) return "D";
+        return "F";
+    }
+
+    public static void main(String[] args) {
+        launch();
+    }
+}
